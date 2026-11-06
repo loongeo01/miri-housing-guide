@@ -1,0 +1,315 @@
+import { useState } from 'react'
+import type { FormEvent } from 'react'
+
+const pathways = [
+  { number: '01', id: 'schemes', label: 'FIND A HOME', title: 'Explore housing schemes', description: 'Browse government housing programmes and see where to find official details.', icon: '⌂', href: '/schemes' },
+  { number: '02', id: 'assistance', label: 'GET SUPPORT', title: 'Housing assistance', description: 'Find information about housing support and the agencies that provide it.', icon: '＋', href: '#assistance' },
+  { number: '03', id: 'guides', label: 'TAKE THE NEXT STEP', title: 'Understand how to apply', description: 'Get familiar with application steps, common documents, and official links.', icon: '↗', href: '#guides' },
+]
+
+const housingSchemes = [
+  {
+    slug: 'ppr', name: 'Program Perumahan Rakyat (PPR)', category: 'Affordable housing', type: 'Rent or own',
+    summary: 'A federal housing programme implemented through the National Housing Department and managed by HDC once completed. HDC lists both rental and ownership options.',
+    source: 'Housing Development Corporation (HDC)', sourceUrl: 'https://hdc.sarawak.gov.my/web/subpage/webpage_view/63', checked: '6 Nov 2026',
+    agency: 'National Housing Department (JPN); managed by HDC once completed.',
+    eligibility: ['Malaysian citizens residing in Sarawak.', 'Applicants aged 18 to 65.', 'Applicants must not own a house or property.', 'Household income of RM5,000 or below. HDC notes priority for squatters for PPR rental.'],
+    application: ['The Sarawak public housing service is available online.', 'Confirm the current PPR application route and availability with HDC before applying.'],
+    documents: ['Copy of applicant’s identity card.', 'Copy of latest income payslip.', 'Birth certificate, if applicable.'],
+    links: [{ label: 'Apply for Public Housing (Service Sarawak)', url: 'https://service.sarawak.gov.my/web/web/home/sla_view/0/711/' }],
+  },
+  {
+    slug: 'rumah-spektra-permata', name: 'Rumah Spektra Permata (RSP)', category: 'Affordable housing', type: 'Home ownership',
+    summary: 'A Sarawak Government housing programme intended to help low- and middle-income families own a home. HDC describes eligibility and project conditions on its official page.',
+    source: 'Housing Development Corporation (HDC)', sourceUrl: 'https://hdc.sarawak.gov.my/web/subpage/webpage_view/127', checked: '6 Nov 2026',
+    agency: 'Sarawak Government; administered by the Housing Development Corporation (HDC).',
+    eligibility: ['HDC’s scheme page lists these conditions: applicants are lot holders allocated by the Land and Survey Department; applicants are aged 18–65; they do not own a house or land; and they are married or a single parent. The page lists household income between RM1,500 and RM6,000.', 'HDC marks the scheme information as updated 23 July 2025. Confirm current terms with HDC before applying.'],
+    application: ['Applications are tied to specific housing projects and registration periods.', 'Check HDC’s current announcements or contact HDC to confirm whether registration is open for a project relevant to you.'],
+    documents: [],
+    links: [{ label: 'HDC announcements', url: 'https://hdc.sarawak.gov.my/web/subpage/announcement_list/' }],
+  },
+  {
+    slug: 'housing-deposit-assistance', name: 'Housing Deposit Assistance Scheme (HDAS)', category: 'Financial assistance', type: 'Deposit assistance',
+    summary: 'Sarawak Government assistance for eligible first-home buyers, and certain landowners building on land under designated village schemes. Check HDC for current conditions.',
+    source: 'Housing Development Corporation (HDC)', sourceUrl: 'https://hdc.sarawak.gov.my/web/subpage/webpage_view/163', checked: '6 Nov 2026',
+    agency: 'Sarawak Government; contact MUTIARA for application enquiries.',
+    eligibility: ['HDC describes the scheme for Sarawakians in the B40 and M40 groups buying a first home, with deposit assistance of 10% up to RM10,000.', 'HDC also describes support for certain landowners building on land allocated under the Village Expansion Scheme (SPK) or Resettlement Scheme (SPS). Confirm all current conditions with HDC or MUTIARA.'],
+    application: ['Contact MUTIARA at 082-313035 or apply at a MUTIARA office, as directed by HDC.', 'Confirm the current process and required documents before preparing an application.'],
+    documents: [],
+    links: [{ label: 'Contact and application information (HDC)', url: 'https://hdc.sarawak.gov.my/web/subpage/webpage_view/163' }],
+  },
+  {
+    slug: 'sras-rental-assistance', name: 'Sarawak Rental Assistance Scheme (SRAS)', category: 'Rental assistance', type: 'Rental support',
+    summary: 'Sarawak Government rental support for eligible tenants. The 2026 programme update includes Miri among the covered districts; check HDC for current eligibility and application details.',
+    source: 'Housing Development Corporation (HDC)', sourceUrl: 'https://hdc.sarawak.gov.my/web/subpage/webpage_view/139', checked: '6 Nov 2026',
+    agency: 'Sarawak Government; administered by the Housing Development Corporation (HDC).',
+    eligibility: ['Miri is listed among the covered districts in the 2026 programme update.', 'The update reports a monthly household income limit raised to RM5,504 and assistance extended to up to 48 months. Confirm how the current criteria apply to your household with HDC.'],
+    application: ['Check the HDC SRAS page for the current application process and whether applications are open.', 'The application portal is linked from HDC’s official SRAS page.'],
+    documents: [],
+    links: [
+      { label: 'SRAS application portal (linked by HDC)', url: 'https://apply-sras.ireka.my/' },
+      { label: '2026 SRAS update and Miri coverage (UKAS)', url: 'https://ukas.sarawak.gov.my/web/subpage/news_view/40777' },
+    ],
+  },
+  {
+    slug: 'pprms-home-repair', name: 'Program Penambahbaikan Rumah Rakyat Miskin Sarawak (PPRMS)', category: 'Home repair assistance', type: 'Home repairs',
+    summary: 'Sarawak assistance to improve unsafe or deteriorated homes for households in need. Official reporting documents PPRMS repairs in Miri, including Pujut, Krokop and Piasau.',
+    source: 'Unit Komunikasi Awam Sarawak (UKAS)', sourceUrl: 'https://ukas.sarawak.gov.my/web/subpage/news_view/50299', checked: '6 Nov 2026',
+    agency: 'Sarawak Government, coordinated locally through constituency service centres and community representatives.',
+    eligibility: ['Local UKAS reporting describes support for low-income and families in need, with priority for older people, people with disabilities, and single-parent households.', 'Eligibility is assessed locally. Contact your constituency service centre to confirm the current criteria and whether support is available in your area.'],
+    application: ['For Miri, ask your local constituency service centre about assessment and application steps.', 'UKAS reporting describes Pujut-area repairs coordinated through the Pujut People’s Service Centre.'],
+    documents: [],
+    links: [{ label: 'PPRMS repairs in Miri (UKAS)', url: 'https://ukas.sarawak.gov.my/web/subpage/news_view/50299' }],
+  },
+]
+
+const announcements = [
+  {
+    title: 'RSP Permyjaya III key handover reported in Miri',
+    date: '2026-10-31', dateLabel: '31 Oct 2026', category: 'Housing project',
+    summary: 'UKAS reported that 80 recipients received keys for RSP Permyjaya III. The report describes a handover and does not confirm current unit availability.',
+    publisher: 'Unit Komunikasi Awam Sarawak (UKAS)', sourceUrl: 'https://ukas.sarawak.gov.my/web/subpage/news_view/52152', relatedScheme: 'rumah-spektra-permata',
+  },
+  {
+    title: 'PPRMS home repairs reported in Pujut',
+    date: '2026-10-08', dateLabel: '8 Oct 2026', category: 'Housing assistance',
+    summary: 'UKAS reported 370 homes repaired in the Pujut constituency, including work around Krokop and Piasau. Contact your local constituency service centre to confirm current support in your area.',
+    publisher: 'Unit Komunikasi Awam Sarawak (UKAS)', sourceUrl: 'https://ukas.sarawak.gov.my/web/subpage/news_view/50299', relatedScheme: 'pprms-home-repair',
+  },
+  {
+    title: 'Sarawak Rental Assistance Scheme expanded',
+    date: '2026-05-18', dateLabel: '18 May 2026', category: 'Housing assistance',
+    summary: 'The 2026 update reports that SRAS covers Miri, raises the household income limit to RM5,504, and extends assistance for up to 48 months. Check HDC for current eligibility details.',
+    publisher: 'Unit Komunikasi Awam Sarawak (UKAS)', sourceUrl: 'https://ukas.sarawak.gov.my/web/subpage/news_view/40777', relatedScheme: 'sras-rental-assistance',
+  },
+]
+
+const schemeUpdates: Record<string, { title: string; date: string; summary: string; url: string }> = Object.fromEntries(
+  announcements.map((announcement) => [announcement.relatedScheme, {
+    title: announcement.title,
+    date: announcement.dateLabel,
+    summary: announcement.summary,
+    url: announcement.sourceUrl,
+  }]),
+)
+
+function SearchIcon() {
+  return <svg aria-hidden="true" viewBox="0 0 24 24" className="search-icon"><circle cx="10.8" cy="10.8" r="6.6" /><path d="m16 16 4.2 4.2" /></svg>
+}
+
+function SchemeCard({ scheme }: { scheme: (typeof housingSchemes)[number] }) {
+  return (
+    <article className="scheme-card">
+      <div className="scheme-card-top"><span className="scheme-category">{scheme.category}</span><span className="scheme-type">{scheme.type}</span></div>
+      <h3><a className="scheme-title-link" href={`/schemes/${scheme.slug}`}>{scheme.name}</a></h3>
+      <p className="scheme-summary">{scheme.summary}</p>
+      <div className="scheme-provenance">
+        <a className="scheme-detail-link" href={`/schemes/${scheme.slug}`}>View scheme details <span aria-hidden="true">→</span></a>
+        <span>Source: <a href={scheme.sourceUrl} target="_blank" rel="noreferrer">{scheme.source}<span className="sr-only"> (opens in a new tab)</span></a></span>
+        <span>Checked {scheme.checked}</span>
+      </div>
+    </article>
+  )
+}
+
+function AnnouncementCard({ announcement }: { announcement: (typeof announcements)[number] }) {
+  const relatedScheme = housingSchemes.find((scheme) => scheme.slug === announcement.relatedScheme)
+
+  return (
+    <article className="announcement-card">
+      <div className="announcement-meta"><span className="announcement-category">{announcement.category}</span><time dateTime={announcement.date}>{announcement.dateLabel}</time></div>
+      <h3>{announcement.title}</h3>
+      <p>{announcement.summary}</p>
+      <div className="announcement-links">
+        <a href={announcement.sourceUrl} target="_blank" rel="noreferrer">Read original from {announcement.publisher}<span className="sr-only"> (opens in a new tab)</span></a>
+        {relatedScheme && <a href={`/schemes/${relatedScheme.slug}`}>View {relatedScheme.name}</a>}
+      </div>
+    </article>
+  )
+}
+
+function App() {
+  const currentPath = window.location.pathname.replace(/\/$/, '')
+  const isSchemesPage = currentPath === '/schemes'
+  const isAnnouncementsPage = currentPath === '/announcements'
+  const selectedScheme = currentPath.startsWith('/schemes/')
+    ? housingSchemes.find((scheme) => scheme.slug === currentPath.slice('/schemes/'.length))
+    : undefined
+  const isSchemeDetailPage = Boolean(selectedScheme)
+  const isSubPage = isSchemesPage || isAnnouncementsPage || isSchemeDetailPage
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [query, setQuery] = useState('')
+  const [schemeCategory, setSchemeCategory] = useState('All categories')
+  const normalizedQuery = query.trim().toLowerCase()
+  const visiblePathways = pathways.filter((pathway) => `${pathway.label} ${pathway.title} ${pathway.description}`.toLowerCase().includes(normalizedQuery))
+  const visibleSchemes = housingSchemes.filter((scheme) => {
+    const matchesQuery = `${scheme.name} ${scheme.category} ${scheme.type} ${scheme.summary}`.toLowerCase().includes(normalizedQuery)
+    const matchesCategory = schemeCategory === 'All categories' || scheme.category === schemeCategory
+    return matchesQuery && matchesCategory
+  })
+
+  function handleSearch(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    document.querySelector('#topics')?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  return (
+    <>
+      <div className="utility-bar">
+        <div className="utility-inner">
+          <span className="utility-location"><span className="location-dot" /> MIRI · SARAWAK</span>
+          <span className="utility-message">An independent guide to housing information</span>
+          <a href={isSubPage ? '/#about' : '#about'}>About this guide <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+
+      <header className="site-header">
+        <a className="brand" href="/" aria-label="Miri Housing Guide home">
+          <span className="brand-mark" aria-hidden="true"><span /></span>
+          <span className="brand-copy"><strong>Miri Housing Guide</strong><small>Find your way home</small></span>
+        </a>
+        <button
+          className="mobile-menu-toggle"
+          type="button"
+          aria-expanded={mobileMenuOpen}
+          aria-controls="site-navigation"
+          aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          onClick={() => setMobileMenuOpen((isOpen) => !isOpen)}
+        >
+          <span /><span /><span />
+        </button>
+        <nav className={`site-nav${mobileMenuOpen ? ' is-open' : ''}`} id="site-navigation" aria-label="Main navigation">
+          <a href="/schemes" onClick={() => setMobileMenuOpen(false)}>Housing schemes</a>
+          <a href="/announcements" onClick={() => setMobileMenuOpen(false)}>Announcements</a>
+          <a href={isSubPage ? '/#assistance' : '#assistance'} onClick={() => setMobileMenuOpen(false)}>Assistance</a>
+          <a href={isSubPage ? '/#guides' : '#guides'} onClick={() => setMobileMenuOpen(false)}>Application guides</a>
+        </nav>
+        <a className="header-cta" href="/schemes">Explore options <span aria-hidden="true">→</span></a>
+      </header>
+
+      {isSchemeDetailPage && selectedScheme ? (
+        <main>
+          <article className="scheme-detail-page" aria-labelledby="scheme-detail-title">
+            <a className="back-home" href="/schemes">← Back to housing schemes</a>
+            <p className="section-kicker">{selectedScheme.category.toUpperCase()} · {selectedScheme.type.toUpperCase()}</p>
+            <h1 className="directory-title" id="scheme-detail-title">{selectedScheme.name}</h1>
+            <p className="scheme-detail-intro">{selectedScheme.summary}</p>
+            <div className="scheme-detail-meta"><span><strong>Responsible agency</strong>{selectedScheme.agency}</span><span><strong>Information checked</strong>{selectedScheme.checked}</span></div>
+            <div className="scheme-detail-grid">
+              <section className="detail-panel"><h2>Eligibility information</h2><ul>{selectedScheme.eligibility.map((item) => <li key={item}>{item}</li>)}</ul></section>
+              <section className="detail-panel"><h2>How to proceed</h2><ol>{selectedScheme.application.map((item) => <li key={item}>{item}</li>)}</ol></section>
+              {selectedScheme.documents.length > 0 && <section className="detail-panel"><h2>Documents listed by Service Sarawak</h2><ul>{selectedScheme.documents.map((item) => <li key={item}>{item}</li>)}</ul></section>}
+              <section className="detail-panel detail-sources"><h2>Official sources and links</h2>
+                <ul>
+                  <li><a href={selectedScheme.sourceUrl} target="_blank" rel="noreferrer">{selectedScheme.source} programme information<span className="sr-only"> (opens in a new tab)</span></a></li>
+                  {selectedScheme.links.map((link) => <li key={link.url}><a href={link.url} target="_blank" rel="noreferrer">{link.label}<span className="sr-only"> (opens in a new tab)</span></a></li>)}
+                </ul>
+              </section>
+            </div>
+            {schemeUpdates[selectedScheme.slug] && <section className="scheme-updates" aria-labelledby="updates-heading">
+              <div className="updates-heading"><p className="section-kicker">NEWS &amp; ANNOUNCEMENTS</p><h2 id="updates-heading">Latest updates</h2></div>
+              <article className="news-update-card">
+                <div className="news-update-meta"><span>Official update</span><time>{schemeUpdates[selectedScheme.slug].date}</time></div>
+                <h3>{schemeUpdates[selectedScheme.slug].title}</h3>
+                <p>{schemeUpdates[selectedScheme.slug].summary}</p>
+                <a href={schemeUpdates[selectedScheme.slug].url} target="_blank" rel="noreferrer">Read the UKAS report <span aria-hidden="true">→</span><span className="sr-only"> (opens in a new tab)</span></a>
+              </article>
+            </section>}
+            <p className="directory-note">This is an independent guide, not an application decision. Requirements and availability can change. Confirm details with the responsible agency before applying.</p>
+          </article>
+        </main>
+      ) : isAnnouncementsPage ? (
+        <main>
+          <section className="announcements-page" aria-labelledby="announcements-heading">
+            <a className="back-home" href="/">← Back to home</a>
+            <div className="section-heading">
+              <div><p className="section-kicker">OFFICIAL UPDATES</p><h1 className="directory-title" id="announcements-heading">Housing announcements</h1></div>
+              <p className="section-aside">Recent updates from official Sarawak sources. Open the original report for full details and check the responsible agency for current status.</p>
+            </div>
+            <div className="announcements-list">{announcements.map((announcement) => <AnnouncementCard announcement={announcement} key={announcement.sourceUrl} />)}</div>
+            <p className="directory-note">Announcements are selected and summarized for this guide. They are not fetched automatically yet.</p>
+          </section>
+        </main>
+      ) : isSchemesPage ? (
+        <main>
+          <section className="scheme-directory scheme-directory-page" aria-labelledby="schemes-heading">
+            <a className="back-home" href="/">← Back to home</a>
+            <div className="section-heading">
+              <div><p className="section-kicker">OFFICIAL PROGRAMMES</p><h1 className="directory-title" id="schemes-heading">Housing schemes &amp; support</h1></div>
+              <p className="section-aside">Browse programmes listed by Sarawak’s Housing Development Corporation. Follow the source for current requirements and local availability.</p>
+            </div>
+            <div className="directory-controls">
+              <label className="directory-search-label" htmlFor="scheme-search">Search this directory</label>
+              <div className="directory-search-wrap"><SearchIcon /><input id="scheme-search" type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Try “rental” or “deposit assistance”" /></div>
+              <label className="sr-only" htmlFor="scheme-category">Filter by category</label>
+              <select id="scheme-category" value={schemeCategory} onChange={(event) => setSchemeCategory(event.target.value)}>
+                <option>All categories</option><option>Affordable housing</option><option>Financial assistance</option><option>Rental assistance</option><option>Home repair assistance</option>
+              </select>
+              <span className="scheme-count">{visibleSchemes.length} {visibleSchemes.length === 1 ? 'programme' : 'programmes'}</span>
+            </div>
+            {visibleSchemes.length > 0 ? <div className="scheme-grid">{visibleSchemes.map((scheme) => <SchemeCard scheme={scheme} key={scheme.name} />)}</div> : <p className="empty-search" role="status">No programmes match those filters. Try another search or choose all categories.</p>}
+            <p className="directory-note">This guide is independent. Programme details and availability can change; confirm requirements with the responsible agency before applying.</p>
+          </section>
+          <section className="trust-strip" id="about">
+            <div className="trust-emblem" aria-hidden="true">i</div>
+            <div><strong>Know where the information comes from.</strong><p>We point you to original sources and mark when information was last checked.</p></div>
+          </section>
+        </main>
+      ) : (
+        <main>
+          <section className="hero" id="top">
+            <div className="hero-image" aria-hidden="true" /><div className="hero-overlay" aria-hidden="true" />
+            <div className="hero-content">
+              <p className="hero-kicker"><span /> HOUSING INFORMATION, MADE CLEARER</p>
+              <h1>Find the right<br />path to <em>your home.</em></h1>
+              <p className="hero-description">A practical starting point for exploring government housing schemes and assistance in Miri.</p>
+              <form className="search-form" onSubmit={handleSearch} role="search">
+                <label className="sr-only" htmlFor="housing-search">Search housing information</label><SearchIcon />
+                <input id="housing-search" name="q" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search schemes, assistance, or application guides" />
+                <button type="submit">Search <span aria-hidden="true">→</span></button>
+              </form>
+              <div className="hero-note"><span className="note-check">✓</span><span>Clear guidance, with links back to official sources</span></div>
+            </div>
+            <div className="hero-caption"><span className="caption-line" /> MIRI, SARAWAK <span className="caption-divider">/</span> COMMUNITY GUIDE</div>
+          </section>
+
+          <section className="pathways" id="topics">
+            <div className="section-heading"><div><p className="section-kicker">START WITH WHAT YOU NEED</p><h2>How can we help you today?</h2></div><p className="section-aside">Explore useful information and continue to the responsible agency for the latest details.</p></div>
+            <div className="pathway-grid">
+              {visiblePathways.map((pathway) => (
+                <a className="pathway-card" href={pathway.href} id={pathway.id === 'schemes' ? undefined : pathway.id} key={pathway.number}>
+                  <div className="pathway-top"><span className="pathway-number">{pathway.number}</span><span className="pathway-icon" aria-hidden="true">{pathway.icon}</span></div>
+                  <p className="pathway-label">{pathway.label}</p><h3>{pathway.title}</h3><p className="pathway-description">{pathway.description}</p>
+                  <span className="pathway-link">Explore information <span aria-hidden="true">→</span></span>
+                </a>
+              ))}
+            </div>
+            {visiblePathways.length === 0 && <p className="empty-search">No matching topics yet. Try “scheme”, “assistance”, or “apply”.</p>}
+          </section>
+
+          <section className="scheme-preview" id="schemes" aria-labelledby="schemes-heading">
+            <div className="section-heading"><div><p className="section-kicker">OFFICIAL PROGRAMMES</p><h2 id="schemes-heading">A few places to start</h2></div><p className="section-aside">Explore a few programmes from official sources. Check the full directory for more details and filters.</p></div>
+            <div className="scheme-grid">{housingSchemes.slice(0, 2).map((scheme) => <SchemeCard scheme={scheme} key={scheme.name} />)}</div>
+            <div className="preview-action"><a className="directory-cta" href="/schemes">Browse all housing schemes <span aria-hidden="true">→</span></a></div>
+            <p className="directory-note">Programme details and availability can change; confirm requirements with the responsible agency before applying.</p>
+          </section>
+
+          <section className="announcement-preview" aria-labelledby="announcement-preview-heading">
+            <div className="section-heading"><div><p className="section-kicker">FROM OFFICIAL SOURCES</p><h2 id="announcement-preview-heading">Latest announcements</h2></div><a className="text-link" href="/announcements">View all announcements <span aria-hidden="true">→</span></a></div>
+            <div className="announcements-list announcements-preview-list">{announcements.slice(0, 2).map((announcement) => <AnnouncementCard announcement={announcement} key={announcement.sourceUrl} />)}</div>
+          </section>
+
+          <section className="trust-strip" id="about">
+            <div className="trust-emblem" aria-hidden="true">i</div>
+            <div><strong>Know where the information comes from.</strong><p>We point you to original sources and mark when information was last checked.</p></div>
+            <a href="#guides">How to use this guide <span aria-hidden="true">→</span></a>
+          </section>
+        </main>
+      )}
+
+      <footer><a className="footer-brand" href="/">Miri Housing Guide</a><span>Independent public information guide for Miri, Sarawak.</span><span className="footer-disclaimer">Not an official government website.</span></footer>
+    </>
+  )
+}
+
+export default App
