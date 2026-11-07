@@ -1,15 +1,16 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 
+type ApplicationAvailability = 'open' | 'closed' | 'unconfirmed'
+
 const pathways = [
   { number: '01', id: 'schemes', label: 'FIND A HOME', title: 'Explore housing schemes', description: 'Browse government housing programmes and see where to find official details.', icon: '⌂', href: '/schemes' },
-  { number: '02', id: 'assistance', label: 'GET SUPPORT', title: 'Housing assistance', description: 'Find information about housing support and the agencies that provide it.', icon: '＋', href: '#assistance' },
-  { number: '03', id: 'guides', label: 'TAKE THE NEXT STEP', title: 'Understand how to apply', description: 'Get familiar with application steps, common documents, and official links.', icon: '↗', href: '#guides' },
+  { number: '02', id: 'guides', label: 'TAKE THE NEXT STEP', title: 'Understand how to apply', description: 'Get familiar with application steps, common documents, and official links.', icon: '↗', href: '/guides' },
 ]
 
 const housingSchemes = [
   {
-    slug: 'ppr', name: 'Program Perumahan Rakyat (PPR)', category: 'Affordable housing', type: 'Rent or own',
+    slug: 'ppr', name: 'Program Perumahan Rakyat (PPR)', category: 'Affordable housing', type: 'Rent or own', availability: 'unconfirmed' as ApplicationAvailability,
     summary: 'A federal housing programme implemented through the National Housing Department and managed by HDC once completed. HDC lists both rental and ownership options.',
     source: 'Housing Development Corporation (HDC)', sourceUrl: 'https://hdc.sarawak.gov.my/web/subpage/webpage_view/63', checked: '6 Nov 2026',
     agency: 'National Housing Department (JPN); managed by HDC once completed.',
@@ -19,7 +20,7 @@ const housingSchemes = [
     links: [{ label: 'Apply for Public Housing (Service Sarawak)', url: 'https://service.sarawak.gov.my/web/web/home/sla_view/0/711/' }],
   },
   {
-    slug: 'rumah-spektra-permata', name: 'Rumah Spektra Permata (RSP)', category: 'Affordable housing', type: 'Home ownership',
+    slug: 'rumah-spektra-permata', name: 'Rumah Spektra Permata (RSP)', category: 'Affordable housing', type: 'Home ownership', availability: 'unconfirmed' as ApplicationAvailability,
     summary: 'A Sarawak Government housing programme intended to help low- and middle-income families own a home. HDC describes eligibility and project conditions on its official page.',
     source: 'Housing Development Corporation (HDC)', sourceUrl: 'https://hdc.sarawak.gov.my/web/subpage/webpage_view/127', checked: '6 Nov 2026',
     agency: 'Sarawak Government; administered by the Housing Development Corporation (HDC).',
@@ -29,7 +30,7 @@ const housingSchemes = [
     links: [{ label: 'HDC announcements', url: 'https://hdc.sarawak.gov.my/web/subpage/announcement_list/' }],
   },
   {
-    slug: 'housing-deposit-assistance', name: 'Housing Deposit Assistance Scheme (HDAS)', category: 'Financial assistance', type: 'Deposit assistance',
+    slug: 'housing-deposit-assistance', name: 'Housing Deposit Assistance Scheme (HDAS)', category: 'Financial assistance', type: 'Deposit assistance', availability: 'unconfirmed' as ApplicationAvailability,
     summary: 'Sarawak Government assistance for eligible first-home buyers, and certain landowners building on land under designated village schemes. Check HDC for current conditions.',
     source: 'Housing Development Corporation (HDC)', sourceUrl: 'https://hdc.sarawak.gov.my/web/subpage/webpage_view/163', checked: '6 Nov 2026',
     agency: 'Sarawak Government; contact MUTIARA for application enquiries.',
@@ -39,7 +40,7 @@ const housingSchemes = [
     links: [{ label: 'Contact and application information (HDC)', url: 'https://hdc.sarawak.gov.my/web/subpage/webpage_view/163' }],
   },
   {
-    slug: 'sras-rental-assistance', name: 'Sarawak Rental Assistance Scheme (SRAS)', category: 'Rental assistance', type: 'Rental support',
+    slug: 'sras-rental-assistance', name: 'Sarawak Rental Assistance Scheme (SRAS)', category: 'Rental assistance', type: 'Rental support', availability: 'unconfirmed' as ApplicationAvailability,
     summary: 'Sarawak Government rental support for eligible tenants. The 2026 programme update includes Miri among the covered districts; check HDC for current eligibility and application details.',
     source: 'Housing Development Corporation (HDC)', sourceUrl: 'https://hdc.sarawak.gov.my/web/subpage/webpage_view/139', checked: '6 Nov 2026',
     agency: 'Sarawak Government; administered by the Housing Development Corporation (HDC).',
@@ -52,7 +53,7 @@ const housingSchemes = [
     ],
   },
   {
-    slug: 'pprms-home-repair', name: 'Program Penambahbaikan Rumah Rakyat Miskin Sarawak (PPRMS)', category: 'Home repair assistance', type: 'Home repairs',
+    slug: 'pprms-home-repair', name: 'Program Penambahbaikan Rumah Rakyat Miskin Sarawak (PPRMS)', category: 'Home repair assistance', type: 'Home repairs', availability: 'unconfirmed' as ApplicationAvailability,
     summary: 'Sarawak assistance to improve unsafe or deteriorated homes for households in need. Official reporting documents PPRMS repairs in Miri, including Pujut, Krokop and Piasau.',
     source: 'Unit Komunikasi Awam Sarawak (UKAS)', sourceUrl: 'https://ukas.sarawak.gov.my/web/subpage/news_view/50299', checked: '6 Nov 2026',
     agency: 'Sarawak Government, coordinated locally through constituency service centres and community representatives.',
@@ -98,15 +99,24 @@ function SearchIcon() {
 }
 
 function SchemeCard({ scheme }: { scheme: (typeof housingSchemes)[number] }) {
+  const availabilityLabel = scheme.availability === 'open'
+    ? 'Applications open'
+    : scheme.availability === 'closed'
+      ? 'Applications closed'
+      : 'Availability unconfirmed'
+
   return (
     <article className="scheme-card">
       <div className="scheme-card-top"><span className="scheme-category">{scheme.category}</span><span className="scheme-type">{scheme.type}</span></div>
+      <span className={`scheme-availability scheme-availability-${scheme.availability}`}>{availabilityLabel}</span>
       <h3><a className="scheme-title-link" href={`/schemes/${scheme.slug}`}>{scheme.name}</a></h3>
       <p className="scheme-summary">{scheme.summary}</p>
       <div className="scheme-provenance">
-        <a className="scheme-detail-link" href={`/schemes/${scheme.slug}`}>View scheme details <span aria-hidden="true">→</span></a>
-        <span>Source: <a href={scheme.sourceUrl} target="_blank" rel="noreferrer">{scheme.source}<span className="sr-only"> (opens in a new tab)</span></a></span>
         <span>Checked {scheme.checked}</span>
+        <div className="scheme-card-actions">
+          <IconLink href={scheme.sourceUrl} label={`${scheme.source} scheme information`} kind="source" external />
+          <IconLink href={`/schemes/${scheme.slug}`} label="View scheme details" kind="details" />
+        </div>
       </div>
     </article>
   )
@@ -121,8 +131,58 @@ function AnnouncementCard({ announcement }: { announcement: (typeof announcement
       <h3>{announcement.title}</h3>
       <p>{announcement.summary}</p>
       <div className="announcement-links">
-        <a href={announcement.sourceUrl} target="_blank" rel="noreferrer">Read original from {announcement.publisher}<span className="sr-only"> (opens in a new tab)</span></a>
-        {relatedScheme && <a href={`/schemes/${relatedScheme.slug}`}>View {relatedScheme.name}</a>}
+        <IconLink href={announcement.sourceUrl} label={`Read original from ${announcement.publisher}`} kind="source" external />
+        {relatedScheme && <IconLink href={`/schemes/${relatedScheme.slug}`} label={`View ${relatedScheme.name}`} kind="details" />}
+      </div>
+    </article>
+  )
+}
+
+function LinkIcon({ kind }: { kind: 'source' | 'external' | 'details' }) {
+  if (kind === 'source') {
+    return <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 3.75h8l4 4v12.5H6z" /><path d="M14 3.75v4h4M9 12h6M9 16h6" /></svg>
+  }
+  if (kind === 'external') {
+    return <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M13 5h6v6M19 5l-9 9" /><path d="M18 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" /></svg>
+  }
+  return <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 19v-4a6 6 0 0 1 6-6h7" /><path d="m14 5 4 4-4 4" /></svg>
+}
+
+function IconLink({ href, label, kind, external = false }: { href: string; label: string; kind: 'source' | 'external' | 'details'; external?: boolean }) {
+  return (
+    <a className="icon-link" href={href} data-tooltip={label} aria-label={external ? `${label} (opens in a new tab)` : label} target={external ? '_blank' : undefined} rel={external ? 'noreferrer' : undefined}>
+      <LinkIcon kind={kind} />
+    </a>
+  )
+}
+
+function ApplicationGuideCard({ scheme }: { scheme: (typeof housingSchemes)[number] }) {
+  return (
+    <article className="application-guide-card">
+      <div className="guide-card-heading">
+        <div><p className="section-kicker">{scheme.category}</p><h2>{scheme.name}</h2></div>
+        <span className="scheme-availability scheme-availability-unconfirmed">Availability unconfirmed</span>
+      </div>
+      <div className="application-guide-content">
+        <details className="guide-accordion">
+          <summary>Suggested next steps</summary>
+          <ol>{scheme.application.map((step) => <li key={step}>{step}</li>)}</ol>
+        </details>
+        <details className="guide-accordion">
+          <summary>Documents</summary>
+          {scheme.documents.length > 0
+            ? <ul>{scheme.documents.map((document) => <li key={document}>{document}</li>)}</ul>
+            : <p>The linked sources do not provide a complete document checklist. Confirm what you need with the responsible agency.</p>}
+        </details>
+      </div>
+      <p className="guide-status-note">Application availability and requirements can change. Confirm the current process with the responsible agency before applying.</p>
+      <div className="guide-card-footer">
+        <p className="guide-checked">Information last checked {scheme.checked}</p>
+        <div className="guide-links">
+          <IconLink href={scheme.sourceUrl} label={`${scheme.source} scheme information`} kind="source" external />
+          {scheme.links.map((link) => <IconLink href={link.url} label={link.label} kind="external" external key={link.url} />)}
+          <IconLink href={`/schemes/${scheme.slug}`} label="View full scheme details" kind="details" />
+        </div>
       </div>
     </article>
   )
@@ -132,20 +192,34 @@ function App() {
   const currentPath = window.location.pathname.replace(/\/$/, '')
   const isSchemesPage = currentPath === '/schemes'
   const isAnnouncementsPage = currentPath === '/announcements'
+  const isGuidesPage = currentPath === '/guides'
   const selectedScheme = currentPath.startsWith('/schemes/')
     ? housingSchemes.find((scheme) => scheme.slug === currentPath.slice('/schemes/'.length))
     : undefined
   const isSchemeDetailPage = Boolean(selectedScheme)
-  const isSubPage = isSchemesPage || isAnnouncementsPage || isSchemeDetailPage
+  const isSubPage = isSchemesPage || isAnnouncementsPage || isGuidesPage || isSchemeDetailPage
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [schemeCategory, setSchemeCategory] = useState('All categories')
+  const [applicationAvailability, setApplicationAvailability] = useState('All application statuses')
+  const [guideQuery, setGuideQuery] = useState('')
+  const [guideCategory, setGuideCategory] = useState('All categories')
+  const [guideAvailability, setGuideAvailability] = useState('All application statuses')
   const normalizedQuery = query.trim().toLowerCase()
   const visiblePathways = pathways.filter((pathway) => `${pathway.label} ${pathway.title} ${pathway.description}`.toLowerCase().includes(normalizedQuery))
   const visibleSchemes = housingSchemes.filter((scheme) => {
     const matchesQuery = `${scheme.name} ${scheme.category} ${scheme.type} ${scheme.summary}`.toLowerCase().includes(normalizedQuery)
     const matchesCategory = schemeCategory === 'All categories' || scheme.category === schemeCategory
-    return matchesQuery && matchesCategory
+    const matchesAvailability = applicationAvailability === 'All application statuses' || scheme.availability === applicationAvailability
+    return matchesQuery && matchesCategory && matchesAvailability
+  })
+  const normalizedGuideQuery = guideQuery.trim().toLowerCase()
+  const visibleGuides = housingSchemes.filter((scheme) => {
+    const searchableGuide = `${scheme.name} ${scheme.category} ${scheme.type} ${scheme.summary} ${scheme.agency} ${scheme.application.join(' ')} ${scheme.documents.join(' ')}`.toLowerCase()
+    const matchesQuery = searchableGuide.includes(normalizedGuideQuery)
+    const matchesCategory = guideCategory === 'All categories' || scheme.category === guideCategory
+    const matchesAvailability = guideAvailability === 'All application statuses' || scheme.availability === guideAvailability
+    return matchesQuery && matchesCategory && matchesAvailability
   })
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {
@@ -181,8 +255,7 @@ function App() {
         <nav className={`site-nav${mobileMenuOpen ? ' is-open' : ''}`} id="site-navigation" aria-label="Main navigation">
           <a href="/schemes" onClick={() => setMobileMenuOpen(false)}>Housing schemes</a>
           <a href="/announcements" onClick={() => setMobileMenuOpen(false)}>Announcements</a>
-          <a href={isSubPage ? '/#assistance' : '#assistance'} onClick={() => setMobileMenuOpen(false)}>Assistance</a>
-          <a href={isSubPage ? '/#guides' : '#guides'} onClick={() => setMobileMenuOpen(false)}>Application guides</a>
+          <a href="/guides" onClick={() => setMobileMenuOpen(false)}>Application guides</a>
         </nav>
         <a className="header-cta" href="/schemes">Explore options <span aria-hidden="true">→</span></a>
       </header>
@@ -212,7 +285,7 @@ function App() {
                 <div className="news-update-meta"><span>Official update</span><time>{schemeUpdates[selectedScheme.slug].date}</time></div>
                 <h3>{schemeUpdates[selectedScheme.slug].title}</h3>
                 <p>{schemeUpdates[selectedScheme.slug].summary}</p>
-                <a href={schemeUpdates[selectedScheme.slug].url} target="_blank" rel="noreferrer">Read the UKAS report <span aria-hidden="true">→</span><span className="sr-only"> (opens in a new tab)</span></a>
+                <div className="news-update-actions"><IconLink href={schemeUpdates[selectedScheme.slug].url} label="Read the UKAS report" kind="source" external /></div>
               </article>
             </section>}
             <p className="directory-note">This is an independent guide, not an application decision. Requirements and availability can change. Confirm details with the responsible agency before applying.</p>
@@ -230,6 +303,33 @@ function App() {
             <p className="directory-note">Announcements are selected and summarized for this guide. They are not fetched automatically yet.</p>
           </section>
         </main>
+      ) : isGuidesPage ? (
+        <main>
+          <section className="guides-page" aria-labelledby="guides-heading">
+            <a className="back-home" href="/">← Back to home</a>
+            <div className="section-heading">
+              <div><p className="section-kicker">TAKE THE NEXT STEP</p><h1 className="directory-title" id="guides-heading">Application guides</h1></div>
+              <p className="section-aside">Use these source-based steps to get started. They are guidance from an independent portal, not official instructions or an application service.</p>
+            </div>
+            <div className="guide-notice"><strong>Before you apply</strong><p>Availability is currently unconfirmed for these schemes. Check the linked official source for current application windows, requirements, and document lists.</p></div>
+            <div className="directory-controls">
+              <label className="directory-search-label" htmlFor="guide-search">Search application guides</label>
+              <div className="directory-search-wrap"><SearchIcon /><input id="guide-search" type="search" value={guideQuery} onChange={(event) => setGuideQuery(event.target.value)} placeholder="Try “PPR”, “rental”, or “documents”" /></div>
+              <label className="sr-only" htmlFor="guide-category">Filter guides by category</label>
+              <select id="guide-category" value={guideCategory} onChange={(event) => setGuideCategory(event.target.value)}>
+                <option>All categories</option>{Array.from(new Set(housingSchemes.map((scheme) => scheme.category))).map((category) => <option key={category}>{category}</option>)}
+              </select>
+              <label className="sr-only" htmlFor="guide-availability">Filter guides by application availability</label>
+              <select id="guide-availability" value={guideAvailability} onChange={(event) => setGuideAvailability(event.target.value)}>
+                <option>All application statuses</option><option value="open">Applications open</option><option value="closed">Applications closed</option><option value="unconfirmed">Availability unconfirmed</option>
+              </select>
+              <span className="scheme-count">{visibleGuides.length} {visibleGuides.length === 1 ? 'guide' : 'guides'}</span>
+            </div>
+            {visibleGuides.length > 0
+              ? <div className="application-guides-list">{visibleGuides.map((scheme) => <ApplicationGuideCard scheme={scheme} key={scheme.slug} />)}</div>
+              : <p className="empty-search" role="status">No application guides match those filters. Try another search or choose all categories.</p>}
+          </section>
+        </main>
       ) : isSchemesPage ? (
         <main>
           <section className="scheme-directory scheme-directory-page" aria-labelledby="schemes-heading">
@@ -244,6 +344,10 @@ function App() {
               <label className="sr-only" htmlFor="scheme-category">Filter by category</label>
               <select id="scheme-category" value={schemeCategory} onChange={(event) => setSchemeCategory(event.target.value)}>
                 <option>All categories</option><option>Affordable housing</option><option>Financial assistance</option><option>Rental assistance</option><option>Home repair assistance</option>
+              </select>
+              <label className="sr-only" htmlFor="scheme-availability">Filter by application availability</label>
+              <select id="scheme-availability" value={applicationAvailability} onChange={(event) => setApplicationAvailability(event.target.value)}>
+                <option>All application statuses</option><option value="open">Applications open</option><option value="closed">Applications closed</option><option value="unconfirmed">Availability unconfirmed</option>
               </select>
               <span className="scheme-count">{visibleSchemes.length} {visibleSchemes.length === 1 ? 'programme' : 'programmes'}</span>
             </div>
@@ -271,6 +375,7 @@ function App() {
               <div className="hero-note"><span className="note-check">✓</span><span>Clear guidance, with links back to official sources</span></div>
             </div>
             <div className="hero-caption"><span className="caption-line" /> MIRI, SARAWAK <span className="caption-divider">/</span> COMMUNITY GUIDE</div>
+            <div className="hero-photo-credit">Photo: <a href="https://commons.wikimedia.org/wiki/File:Sunset_over_Marina_Bay_at_Miri,_Sarawak.jpg" target="_blank" rel="noreferrer">Achmed Azizie</a> · <a href="https://creativecommons.org/licenses/by/2.0/" target="_blank" rel="noreferrer">CC BY 2.0</a> (cropped)</div>
           </section>
 
           <section className="pathways" id="topics">
@@ -302,7 +407,7 @@ function App() {
           <section className="trust-strip" id="about">
             <div className="trust-emblem" aria-hidden="true">i</div>
             <div><strong>Know where the information comes from.</strong><p>We point you to original sources and mark when information was last checked.</p></div>
-            <a href="#guides">How to use this guide <span aria-hidden="true">→</span></a>
+            <a href="/guides">Application guides <span aria-hidden="true">→</span></a>
           </section>
         </main>
       )}
