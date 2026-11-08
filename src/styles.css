@@ -97,6 +97,9 @@ h3 { margin: 0; color: #18365f; font-family: Manrope, sans-serif; font-size: 18p
 .pathway-link span { font-size: 14px; transition: transform .2s; }
 .pathway-card:hover .pathway-link span { transform: translateX(3px); }
 .empty-search { padding: 22px; border: 1px dashed #cbd6e4; color: #64748b; font-size: 12px; }
+.scheme-load-error { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 16px 18px; border: 1px solid #e0c5c5; border-radius: 4px; color: #7b3f3f; background: #fff7f7; font-size: 13px; line-height: 1.6; }
+.scheme-load-error button { flex: 0 0 auto; padding: 8px 12px; border: 1px solid #b77c7c; border-radius: 3px; color: #713d3d; background: transparent; cursor: pointer; font-size: 12px; font-weight: 700; }
+.scheme-load-error button:hover, .scheme-load-error button:focus-visible { background: #f7e8e8; }
 
 .scheme-directory, .scheme-preview { width: min(1200px, 86%); margin: 0 auto; padding: 9px 0 48px; scroll-margin-top: 24px; }
 .scheme-directory-page { padding-top: 35px; }

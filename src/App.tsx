@@ -1,67 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
-
-type ApplicationAvailability = 'open' | 'closed' | 'unconfirmed'
+import type { HousingScheme } from './types/housing-scheme'
 
 const pathways = [
   { number: '01', id: 'schemes', label: 'FIND A HOME', title: 'Explore housing schemes', description: 'Browse government housing programmes and see where to find official details.', icon: '⌂', href: '/schemes' },
   { number: '02', id: 'guides', label: 'TAKE THE NEXT STEP', title: 'Understand how to apply', description: 'Get familiar with application steps, common documents, and official links.', icon: '↗', href: '/guides' },
-]
-
-const housingSchemes = [
-  {
-    slug: 'ppr', name: 'Program Perumahan Rakyat (PPR)', category: 'Affordable housing', type: 'Rent or own', availability: 'unconfirmed' as ApplicationAvailability,
-    summary: 'A federal housing programme implemented through the National Housing Department and managed by HDC once completed. HDC lists both rental and ownership options.',
-    source: 'Housing Development Corporation (HDC)', sourceUrl: 'https://hdc.sarawak.gov.my/web/subpage/webpage_view/63', checked: '6 Nov 2026',
-    agency: 'National Housing Department (JPN); managed by HDC once completed.',
-    eligibility: ['Malaysian citizens residing in Sarawak.', 'Applicants aged 18 to 65.', 'Applicants must not own a house or property.', 'Household income of RM5,000 or below. HDC notes priority for squatters for PPR rental.'],
-    application: ['The Sarawak public housing service is available online.', 'Confirm the current PPR application route and availability with HDC before applying.'],
-    documents: ['Copy of applicant’s identity card.', 'Copy of latest income payslip.', 'Birth certificate, if applicable.'],
-    links: [{ label: 'Apply for Public Housing (Service Sarawak)', url: 'https://service.sarawak.gov.my/web/web/home/sla_view/0/711/' }],
-  },
-  {
-    slug: 'rumah-spektra-permata', name: 'Rumah Spektra Permata (RSP)', category: 'Affordable housing', type: 'Home ownership', availability: 'unconfirmed' as ApplicationAvailability,
-    summary: 'A Sarawak Government housing programme intended to help low- and middle-income families own a home. HDC describes eligibility and project conditions on its official page.',
-    source: 'Housing Development Corporation (HDC)', sourceUrl: 'https://hdc.sarawak.gov.my/web/subpage/webpage_view/127', checked: '6 Nov 2026',
-    agency: 'Sarawak Government; administered by the Housing Development Corporation (HDC).',
-    eligibility: ['HDC’s scheme page lists these conditions: applicants are lot holders allocated by the Land and Survey Department; applicants are aged 18–65; they do not own a house or land; and they are married or a single parent. The page lists household income between RM1,500 and RM6,000.', 'HDC marks the scheme information as updated 23 July 2025. Confirm current terms with HDC before applying.'],
-    application: ['Applications are tied to specific housing projects and registration periods.', 'Check HDC’s current announcements or contact HDC to confirm whether registration is open for a project relevant to you.'],
-    documents: [],
-    links: [{ label: 'HDC announcements', url: 'https://hdc.sarawak.gov.my/web/subpage/announcement_list/' }],
-  },
-  {
-    slug: 'housing-deposit-assistance', name: 'Housing Deposit Assistance Scheme (HDAS)', category: 'Financial assistance', type: 'Deposit assistance', availability: 'unconfirmed' as ApplicationAvailability,
-    summary: 'Sarawak Government assistance for eligible first-home buyers, and certain landowners building on land under designated village schemes. Check HDC for current conditions.',
-    source: 'Housing Development Corporation (HDC)', sourceUrl: 'https://hdc.sarawak.gov.my/web/subpage/webpage_view/163', checked: '6 Nov 2026',
-    agency: 'Sarawak Government; contact MUTIARA for application enquiries.',
-    eligibility: ['HDC describes the scheme for Sarawakians in the B40 and M40 groups buying a first home, with deposit assistance of 10% up to RM10,000.', 'HDC also describes support for certain landowners building on land allocated under the Village Expansion Scheme (SPK) or Resettlement Scheme (SPS). Confirm all current conditions with HDC or MUTIARA.'],
-    application: ['Contact MUTIARA at 082-313035 or apply at a MUTIARA office, as directed by HDC.', 'Confirm the current process and required documents before preparing an application.'],
-    documents: [],
-    links: [{ label: 'Contact and application information (HDC)', url: 'https://hdc.sarawak.gov.my/web/subpage/webpage_view/163' }],
-  },
-  {
-    slug: 'sras-rental-assistance', name: 'Sarawak Rental Assistance Scheme (SRAS)', category: 'Rental assistance', type: 'Rental support', availability: 'unconfirmed' as ApplicationAvailability,
-    summary: 'Sarawak Government rental support for eligible tenants. The 2026 programme update includes Miri among the covered districts; check HDC for current eligibility and application details.',
-    source: 'Housing Development Corporation (HDC)', sourceUrl: 'https://hdc.sarawak.gov.my/web/subpage/webpage_view/139', checked: '6 Nov 2026',
-    agency: 'Sarawak Government; administered by the Housing Development Corporation (HDC).',
-    eligibility: ['Miri is listed among the covered districts in the 2026 programme update.', 'The update reports a monthly household income limit raised to RM5,504 and assistance extended to up to 48 months. Confirm how the current criteria apply to your household with HDC.'],
-    application: ['Check the HDC SRAS page for the current application process and whether applications are open.', 'The application portal is linked from HDC’s official SRAS page.'],
-    documents: [],
-    links: [
-      { label: 'SRAS application portal (linked by HDC)', url: 'https://apply-sras.ireka.my/' },
-      { label: '2026 SRAS update and Miri coverage (UKAS)', url: 'https://ukas.sarawak.gov.my/web/subpage/news_view/40777' },
-    ],
-  },
-  {
-    slug: 'pprms-home-repair', name: 'Program Penambahbaikan Rumah Rakyat Miskin Sarawak (PPRMS)', category: 'Home repair assistance', type: 'Home repairs', availability: 'unconfirmed' as ApplicationAvailability,
-    summary: 'Sarawak assistance to improve unsafe or deteriorated homes for households in need. Official reporting documents PPRMS repairs in Miri, including Pujut, Krokop and Piasau.',
-    source: 'Unit Komunikasi Awam Sarawak (UKAS)', sourceUrl: 'https://ukas.sarawak.gov.my/web/subpage/news_view/50299', checked: '6 Nov 2026',
-    agency: 'Sarawak Government, coordinated locally through constituency service centres and community representatives.',
-    eligibility: ['Local UKAS reporting describes support for low-income and families in need, with priority for older people, people with disabilities, and single-parent households.', 'Eligibility is assessed locally. Contact your constituency service centre to confirm the current criteria and whether support is available in your area.'],
-    application: ['For Miri, ask your local constituency service centre about assessment and application steps.', 'UKAS reporting describes Pujut-area repairs coordinated through the Pujut People’s Service Centre.'],
-    documents: [],
-    links: [{ label: 'PPRMS repairs in Miri (UKAS)', url: 'https://ukas.sarawak.gov.my/web/subpage/news_view/50299' }],
-  },
 ]
 
 const announcements = [
@@ -98,7 +41,7 @@ function SearchIcon() {
   return <svg aria-hidden="true" viewBox="0 0 24 24" className="search-icon"><circle cx="10.8" cy="10.8" r="6.6" /><path d="m16 16 4.2 4.2" /></svg>
 }
 
-function SchemeCard({ scheme }: { scheme: (typeof housingSchemes)[number] }) {
+function SchemeCard({ scheme }: { scheme: HousingScheme }) {
   const availabilityLabel = scheme.availability === 'open'
     ? 'Applications open'
     : scheme.availability === 'closed'
@@ -122,8 +65,8 @@ function SchemeCard({ scheme }: { scheme: (typeof housingSchemes)[number] }) {
   )
 }
 
-function AnnouncementCard({ announcement }: { announcement: (typeof announcements)[number] }) {
-  const relatedScheme = housingSchemes.find((scheme) => scheme.slug === announcement.relatedScheme)
+function AnnouncementCard({ announcement, schemes }: { announcement: (typeof announcements)[number]; schemes: HousingScheme[] }) {
+  const relatedScheme = schemes.find((scheme) => scheme.slug === announcement.relatedScheme)
 
   return (
     <article className="announcement-card">
@@ -156,7 +99,7 @@ function IconLink({ href, label, kind, external = false }: { href: string; label
   )
 }
 
-function ApplicationGuideCard({ scheme }: { scheme: (typeof housingSchemes)[number] }) {
+function ApplicationGuideCard({ scheme }: { scheme: HousingScheme }) {
   return (
     <article className="application-guide-card">
       <div className="guide-card-heading">
@@ -188,23 +131,69 @@ function ApplicationGuideCard({ scheme }: { scheme: (typeof housingSchemes)[numb
   )
 }
 
+type SchemeLoadStatus = 'loading' | 'loaded' | 'error'
+
+function SchemeLoadNotice({ status, onRetry }: { status: SchemeLoadStatus; onRetry: () => void }) {
+  if (status === 'loaded') return null
+  if (status === 'loading') return <p className="empty-search" role="status">Loading housing information…</p>
+
+  return (
+    <div className="scheme-load-error" role="alert">
+      <span>Housing information could not be loaded. Check the API and database setup, then try again.</span>
+      <button type="button" onClick={onRetry}>Try again</button>
+    </div>
+  )
+}
+
 function App() {
   const currentPath = window.location.pathname.replace(/\/$/, '')
   const isSchemesPage = currentPath === '/schemes'
   const isAnnouncementsPage = currentPath === '/announcements'
   const isGuidesPage = currentPath === '/guides'
-  const selectedScheme = currentPath.startsWith('/schemes/')
-    ? housingSchemes.find((scheme) => scheme.slug === currentPath.slice('/schemes/'.length))
-    : undefined
-  const isSchemeDetailPage = Boolean(selectedScheme)
+  const isSchemeDetailPage = currentPath.startsWith('/schemes/')
   const isSubPage = isSchemesPage || isAnnouncementsPage || isGuidesPage || isSchemeDetailPage
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [housingSchemes, setHousingSchemes] = useState<HousingScheme[]>([])
+  const [schemeLoadStatus, setSchemeLoadStatus] = useState<SchemeLoadStatus>('loading')
+  const [schemeLoadAttempt, setSchemeLoadAttempt] = useState(0)
   const [query, setQuery] = useState('')
   const [schemeCategory, setSchemeCategory] = useState('All categories')
   const [applicationAvailability, setApplicationAvailability] = useState('All application statuses')
   const [guideQuery, setGuideQuery] = useState('')
   const [guideCategory, setGuideCategory] = useState('All categories')
   const [guideAvailability, setGuideAvailability] = useState('All application statuses')
+  const selectedScheme = housingSchemes.find((scheme) => scheme.slug === currentPath.slice('/schemes/'.length))
+
+  useEffect(() => {
+    const controller = new AbortController()
+    const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
+
+    async function loadSchemes() {
+      setSchemeLoadStatus('loading')
+      try {
+        const response = await fetch(`${apiBaseUrl}/api/schemes`, { signal: controller.signal })
+        if (!response.ok) throw new Error(`Scheme API responded with ${response.status}`)
+
+        const payload = await response.json() as { schemes: HousingScheme[] }
+        if (!Array.isArray(payload.schemes)) throw new Error('Scheme API returned an invalid response')
+
+        setHousingSchemes(payload.schemes)
+        setSchemeLoadStatus('loaded')
+      } catch (error) {
+        if (controller.signal.aborted) return
+        console.error('Could not load housing schemes.', error)
+        setSchemeLoadStatus('error')
+      }
+    }
+
+    void loadSchemes()
+    return () => controller.abort()
+  }, [schemeLoadAttempt])
+
+  function retrySchemeLoad() {
+    setSchemeLoadAttempt((attempt) => attempt + 1)
+  }
+
   const normalizedQuery = query.trim().toLowerCase()
   const visiblePathways = pathways.filter((pathway) => `${pathway.label} ${pathway.title} ${pathway.description}`.toLowerCase().includes(normalizedQuery))
   const visibleSchemes = housingSchemes.filter((scheme) => {
@@ -253,14 +242,13 @@ function App() {
           <span /><span /><span />
         </button>
         <nav className={`site-nav${mobileMenuOpen ? ' is-open' : ''}`} id="site-navigation" aria-label="Main navigation">
-          <a href="/schemes" onClick={() => setMobileMenuOpen(false)}>Housing schemes</a>
           <a href="/announcements" onClick={() => setMobileMenuOpen(false)}>Announcements</a>
           <a href="/guides" onClick={() => setMobileMenuOpen(false)}>Application guides</a>
         </nav>
-        <a className="header-cta" href="/schemes">Explore options <span aria-hidden="true">→</span></a>
+        <a className="header-cta" href="/schemes">Explore schemes <span aria-hidden="true">→</span></a>
       </header>
 
-      {isSchemeDetailPage && selectedScheme ? (
+      {isSchemeDetailPage ? selectedScheme ? (
         <main>
           <article className="scheme-detail-page" aria-labelledby="scheme-detail-title">
             <a className="back-home" href="/schemes">← Back to housing schemes</a>
@@ -291,6 +279,10 @@ function App() {
             <p className="directory-note">This is an independent guide, not an application decision. Requirements and availability can change. Confirm details with the responsible agency before applying.</p>
           </article>
         </main>
+      ) : schemeLoadStatus === 'loaded' ? (
+        <main><section className="scheme-detail-page"><h1 className="directory-title">Scheme not found</h1><p className="scheme-detail-intro">That scheme could not be found in the directory.</p><a className="back-home" href="/schemes">Browse housing schemes</a></section></main>
+      ) : (
+        <main><section className="scheme-detail-page"><SchemeLoadNotice status={schemeLoadStatus} onRetry={retrySchemeLoad} /></section></main>
       ) : isAnnouncementsPage ? (
         <main>
           <section className="announcements-page" aria-labelledby="announcements-heading">
@@ -299,7 +291,7 @@ function App() {
               <div><p className="section-kicker">OFFICIAL UPDATES</p><h1 className="directory-title" id="announcements-heading">Housing announcements</h1></div>
               <p className="section-aside">Recent updates from official Sarawak sources. Open the original report for full details and check the responsible agency for current status.</p>
             </div>
-            <div className="announcements-list">{announcements.map((announcement) => <AnnouncementCard announcement={announcement} key={announcement.sourceUrl} />)}</div>
+            <div className="announcements-list">{announcements.map((announcement) => <AnnouncementCard announcement={announcement} schemes={housingSchemes} key={announcement.sourceUrl} />)}</div>
             <p className="directory-note">Announcements are selected and summarized for this guide. They are not fetched automatically yet.</p>
           </section>
         </main>
@@ -325,7 +317,7 @@ function App() {
               </select>
               <span className="scheme-count">{visibleGuides.length} {visibleGuides.length === 1 ? 'guide' : 'guides'}</span>
             </div>
-            {visibleGuides.length > 0
+            {schemeLoadStatus !== 'loaded' ? <SchemeLoadNotice status={schemeLoadStatus} onRetry={retrySchemeLoad} /> : visibleGuides.length > 0
               ? <div className="application-guides-list">{visibleGuides.map((scheme) => <ApplicationGuideCard scheme={scheme} key={scheme.slug} />)}</div>
               : <p className="empty-search" role="status">No application guides match those filters. Try another search or choose all categories.</p>}
           </section>
@@ -351,7 +343,7 @@ function App() {
               </select>
               <span className="scheme-count">{visibleSchemes.length} {visibleSchemes.length === 1 ? 'programme' : 'programmes'}</span>
             </div>
-            {visibleSchemes.length > 0 ? <div className="scheme-grid">{visibleSchemes.map((scheme) => <SchemeCard scheme={scheme} key={scheme.name} />)}</div> : <p className="empty-search" role="status">No programmes match those filters. Try another search or choose all categories.</p>}
+            {schemeLoadStatus !== 'loaded' ? <SchemeLoadNotice status={schemeLoadStatus} onRetry={retrySchemeLoad} /> : visibleSchemes.length > 0 ? <div className="scheme-grid">{visibleSchemes.map((scheme) => <SchemeCard scheme={scheme} key={scheme.name} />)}</div> : <p className="empty-search" role="status">No programmes match those filters. Try another search or choose all categories.</p>}
             <p className="directory-note">This guide is independent. Programme details and availability can change; confirm requirements with the responsible agency before applying.</p>
           </section>
           <section className="trust-strip" id="about">
@@ -394,14 +386,14 @@ function App() {
 
           <section className="scheme-preview" id="schemes" aria-labelledby="schemes-heading">
             <div className="section-heading"><div><p className="section-kicker">OFFICIAL PROGRAMMES</p><h2 id="schemes-heading">A few places to start</h2></div><p className="section-aside">Explore a few programmes from official sources. Check the full directory for more details and filters.</p></div>
-            <div className="scheme-grid">{housingSchemes.slice(0, 2).map((scheme) => <SchemeCard scheme={scheme} key={scheme.name} />)}</div>
+            {schemeLoadStatus !== 'loaded' ? <SchemeLoadNotice status={schemeLoadStatus} onRetry={retrySchemeLoad} /> : <div className="scheme-grid">{housingSchemes.slice(0, 2).map((scheme) => <SchemeCard scheme={scheme} key={scheme.name} />)}</div>}
             <div className="preview-action"><a className="directory-cta" href="/schemes">Browse all housing schemes <span aria-hidden="true">→</span></a></div>
             <p className="directory-note">Programme details and availability can change; confirm requirements with the responsible agency before applying.</p>
           </section>
 
           <section className="announcement-preview" aria-labelledby="announcement-preview-heading">
             <div className="section-heading"><div><p className="section-kicker">FROM OFFICIAL SOURCES</p><h2 id="announcement-preview-heading">Latest announcements</h2></div><a className="text-link" href="/announcements">View all announcements <span aria-hidden="true">→</span></a></div>
-            <div className="announcements-list announcements-preview-list">{announcements.slice(0, 2).map((announcement) => <AnnouncementCard announcement={announcement} key={announcement.sourceUrl} />)}</div>
+            <div className="announcements-list announcements-preview-list">{announcements.slice(0, 2).map((announcement) => <AnnouncementCard announcement={announcement} schemes={housingSchemes} key={announcement.sourceUrl} />)}</div>
           </section>
 
           <section className="trust-strip" id="about">
