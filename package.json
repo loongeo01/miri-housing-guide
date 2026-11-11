@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "dev:api": "wrangler dev --config wrangler.jsonc --port 8787",
+    "test": "vitest run",
     "build": "tsc -b && tsc --noEmit --target ES2022 --module ESNext --moduleResolution bundler --strict --skipLibCheck worker/index.ts && vite build",
     "preview": "vite preview",
     "deploy:api": "wrangler deploy --config wrangler.jsonc"
@@ -22,6 +23,7 @@
     "@vitejs/plugin-react": "^5.0.0",
     "typescript": "~5.8.3",
     "vite": "^7.0.0",
+    "vitest": "^5.1.0",
     "wrangler": "^4.158.0"
   }
 }
